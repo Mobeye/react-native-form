@@ -10,6 +10,8 @@ export interface CancelablePromise<T> {
 
 interface FormUrl {
     readonly src: string;
+    readonly thumbnail?: string;
+    readonly full_size_picture?: string;
     readonly name?: string;
     readonly size?: number;
     readonly dimensions?: {

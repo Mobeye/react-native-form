@@ -42,7 +42,8 @@ function DescriptionPictures(props: DescriptionPicturesProps) {
             if (formUrl.dimensions) {
                 newPictureSizes[index] = formUrl.dimensions;
             } else {
-                const cancelablePromise = makeCancelablePromise<PictureSize>(getImageSize(formUrl.src));
+                const thumbnailUrl = formUrl.thumbnail || formUrl.src;
+                const cancelablePromise = makeCancelablePromise<PictureSize>(getImageSize(thumbnailUrl));
                 cancelablePromises.push(cancelablePromise);
 
                 cancelablePromise.promise
@@ -63,10 +64,12 @@ function DescriptionPictures(props: DescriptionPicturesProps) {
         };
     }, [pictures]);
 
-    const pictureUris = React.useMemo(() => pictures.map((formUrl) => formUrl.src), [pictures]);
+    const pictureUris = React.useMemo(() => {
+        return pictures.map((formUrl) => formUrl.full_size_picture || formUrl.src);
+    }, [pictures]);
 
     // There are no pictures to render
-    if (!pictureUris.length) return null;
+    if (!pictures.length) return null;
 
     return (
         <View>
@@ -80,13 +83,14 @@ function DescriptionPictures(props: DescriptionPicturesProps) {
             )}
 
             <View style={[{ flex: 1, alignItems: 'center' }, props.containerStyle]}>
-                {pictureUris.map((uri, index) => {
+                {pictures.map((formUrl, index) => {
                     if (!pictureSizes[index]) return null;
 
                     const { height, width } = pictureSizes[index];
+                    const thumbnailUrl = formUrl.thumbnail || formUrl.src;
                     return (
                         <TouchableHighlight
-                            key={uri}
+                            key={thumbnailUrl}
                             onPress={() => {
                                 setDisplayViewer(true);
                                 setViewerIndex(index);
@@ -95,7 +99,7 @@ function DescriptionPictures(props: DescriptionPicturesProps) {
                             disabled={!ImageViewer}
                         >
                             <Image
-                                source={{ uri }}
+                                source={{ uri: thumbnailUrl }}
                                 style={[
                                     { marginBottom: 15, height, width, maxHeight: 300, resizeMode: 'contain' },
                                     props.pictureStyle,
